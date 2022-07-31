@@ -44,12 +44,16 @@
 #define shutOffset 2
 #define lampOffset 3
 
+// speed and microstep for stepper
+#define MICROSTEPS 1
+#define RPM 120
+
 //------------------------------------
 // Globals and instances of stuff
 //------------------------------------
 
 // init of stepper
-A4988 stepper(MOTOR_STEPS, DIR, STEP);
+A4988 shutter(MOTOR_STEPS, DIR, STEP);
 
 // Create azimut motor instance
 L298N azimut(azEN, azIN1, azIN2);
@@ -65,14 +69,20 @@ uint16_t dmxAddr = 0;
 //------------------------------------
 
 void setup() {
+  // init DMX
   DMXSerial.init(DMXReceiver);
 
+  // set pinmodes for outputs
   pinMode(LED, OUTPUT);
   pinMode(lampOn, OUTPUT);
-  pinMode(setDMXBtn, INPUT_PULLUP);
 
+  // set pinmodes for inputs
+  pinMode(setDMXBtn, INPUT_PULLUP);
   pinMode(endStopL, INPUT_PULLUP);
   pinMode(endStopR, INPUT_PULLUP);
+
+  // init stepper for shutter
+  shutter.begin(RPM, MICROSTEPS);
 
   // get DMX address for EEPROM
   EEPROM.get(0, dmxAddr);
@@ -122,6 +132,14 @@ void loop() {
   //------------------------------------
   // Handle shutter
   //------------------------------------
+  if(DMXSerial.read(dmxAddr + shutOffset) > 127)
+  {
+    shutter.startRotate(120);
+  }
+  else
+  {
+    shutter.startRotate(-120);
+  }
 
   //------------------------------------
   // Handle Lamp
