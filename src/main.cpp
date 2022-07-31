@@ -124,6 +124,24 @@ void loop() {
   //------------------------------------
 
   //------------------------------------
+  // Handle Lamp
+  //------------------------------------
+
+  if(DMXSerial.read(dmxAddr + lampOffset) > 200)
+  {
+    // turn HID lamp on
+    digitalWrite(lampOn, HIGH);
+  }
+  else
+  {
+    // turn lamp off with hysteresis
+    if(DMXSerial.read(dmxAddr + lampOffset) < 170)
+    {
+      digitalWrite(lampOn, LOW);
+    }
+  }
+
+  //------------------------------------
   // Misc stuff, LED blinking
   //------------------------------------
 
