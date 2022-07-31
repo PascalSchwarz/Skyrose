@@ -17,9 +17,8 @@
 #define miIN2 8
 #define miEN 6
 
-// Lamp control in and out
+// Lamp control
 #define lampOn 12
-#define lampBtn 13
 
 // DMX address set button
 #define setDMXBtn 4
@@ -27,6 +26,9 @@
 // Endstops for Azimut
 #define endStopL A0
 #define endStopR A1
+
+// Onboard LED
+#define LED 13
 
 // init of stepper
 A4988 stepper(MOTOR_STEPS, DIR, STEP);
