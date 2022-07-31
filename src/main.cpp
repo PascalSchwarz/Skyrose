@@ -73,6 +73,9 @@ void setup() {
 
   pinMode(endStopL, INPUT_PULLUP);
   pinMode(endStopR, INPUT_PULLUP);
+
+  // get DMX address for EEPROM
+  EEPROM.get(0, dmxAddr);
 }
 
 //------------------------------------
@@ -105,12 +108,12 @@ void loop() {
   uint8_t azimutSpeed = DMXSerial.read(dmxAddr + azOffset);
 
   azimut.setSpeed(azimutSpeed);
-  if(digitalRead(endStopR) == 0 and azimut.getDirection() == L298N::BACKWARD)
+  if(digitalRead(endStopR) == LOW and azimut.getDirection() == L298N::BACKWARD)
   {
     // we hit the endstop, reverse motor
     azimut.forward();
   }
-  if(digitalRead(endStopL) == 0 and azimut.getDirection() == L298N::FORWARD)
+  if(digitalRead(endStopL) == LOW and azimut.getDirection() == L298N::FORWARD)
   {
     // hit the other endstop, reverse again!
     azimut.backward();
@@ -128,6 +131,29 @@ void loop() {
   if(loopcnt % 50 == 0)
   {
     digitalWrite(LED, !digitalRead(LED));
+  }
+
+  // change DMX address if button is pushed
+  if(digitalRead(setDMXBtn) == LOW)
+  {
+    uint16_t highestAddr = 0;
+    uint8_t highestVal = 0;
+
+    // search for highest channel
+    for (uint16_t i = 0; i < 511; i++)
+    {
+      if(DMXSerial.read(i) > highestVal)
+      {
+        highestVal = DMXSerial.read(i);
+        highestAddr = i;
+      }
+    }
+
+    // write channel to variable
+    dmxAddr = highestAddr;
+    
+    // write variable to EEPROM for next boot
+    EEPROM.put(0, dmxAddr);
   }
 
   // update everything every 20ms only, should be fine
