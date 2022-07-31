@@ -64,6 +64,9 @@ L298N mirror(miEN, miIN1, miIN2);
 // dmxAddr variable, will be loaded from eeprom at startup
 uint16_t dmxAddr = 0;
 
+// shutterstate
+uint8_t shutterState = 0;
+
 //------------------------------------
 // Run setup once
 //------------------------------------
@@ -132,13 +135,16 @@ void loop() {
   //------------------------------------
   // Handle shutter
   //------------------------------------
-  if(DMXSerial.read(dmxAddr + shutOffset) > 127)
+  if(DMXSerial.read(dmxAddr + shutOffset) > 127 && shutterState == 0)
   {
     shutter.startRotate(120);
+    shutterState = 1;
   }
-  else
+
+  if(DMXSerial.read(dmxAddr + shutOffset) <= 127 && shutterState == 1)
   {
     shutter.startRotate(-120);
+    shutterState = 0;
   }
 
   //------------------------------------
@@ -193,6 +199,12 @@ void loop() {
   }
 
   // update everything every 20ms only, should be fine
-  delay(20);
+  static long tic = millis();
+  while (millis() - tic < 20)
+  {
+    // send steppercommands while we wait
+    shutter.nextAction();
+  }
+  
   loopcnt++;
 }
