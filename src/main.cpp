@@ -80,6 +80,8 @@ void setup() {
 //------------------------------------
 
 void loop() {
+  static uint32_t loopcnt = 0;
+
   //------------------------------------
   // Handle mirror reflector
   //------------------------------------
@@ -118,6 +120,17 @@ void loop() {
   // Handle shutter
   //------------------------------------
 
+  //------------------------------------
+  // Misc stuff, LED blinking
+  //------------------------------------
+
+  // evenly divisible by 50 -> every second, i hope
+  if(loopcnt % 50 == 0)
+  {
+    digitalWrite(LED, !digitalRead(LED));
+  }
+
   // update everything every 20ms only, should be fine
   delay(20);
+  loopcnt++;
 }
